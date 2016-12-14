@@ -75,12 +75,12 @@ public class RealEstateParser {
     }
 
     Set<RealEstate> parseRealEstateAdds(Set<Document> addDocuments) {
-        return addDocuments.stream().map(this::parseRealEstateAdd).collect(Collectors.toSet());
+        return addDocuments.stream().map(this::parseRealEstateAdd).filter(result -> result != null).collect(Collectors.toSet());
     }
 
     private RealEstate parseRealEstateAdd(Document addDocument) {
-        RealEstate.Builder realEstateBuilder = new RealEstate.Builder();
         try {
+            RealEstate.Builder realEstateBuilder = new RealEstate.Builder();
             parseReferenceNumber(addDocument, realEstateBuilder);
 
             Element moreInfo = RealEstateParserUtils.getElementsForClass(addDocument, MORE_INFO_STYLE_CLASS).first();
@@ -114,10 +114,11 @@ public class RealEstateParser {
 
             Elements description = RealEstateParserUtils.getElementsForClass(addDocument, DESCRIPTION_STYLE_CLASS);
             realEstateBuilder.description(description != null ? description.text() : null);
+            return realEstateBuilder.build();
         } catch (RuntimeException e) {
             Logger.getAnonymousLogger().log(Level.SEVERE, "Parsing an add resulted in fatal crash. Error: " + e.getMessage());
         }
-        return realEstateBuilder.build();
+        return null;
     }
 
     private void parseMacroRegion(RealEstate.Builder realEstateBuilder, String moreInfoText) {
