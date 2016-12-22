@@ -236,7 +236,7 @@ public class RealEstateParser {
     private String parseReferenceNumber(Document addDocument) {
         Elements labels = RealEstateParserUtils.getElementsForClass(addDocument, LABEL_STYLE_CLASS);
         Element referenceNumberLabel = labels.stream().filter(label -> label.text().equals(LABEL_REFERENCE_NUMBER)).findFirst().orElse(null);
-        return referenceNumberLabel != null ? referenceNumberLabel.firstElementSibling().text() : null;
+        return referenceNumberLabel != null ? referenceNumberLabel.nextElementSibling().text() : null;
     }
 
     private void writeToFile(Set<RealEstate> realEstates, String pathToFile) {
