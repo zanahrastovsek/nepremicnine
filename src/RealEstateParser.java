@@ -4,13 +4,17 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by zana on 06/12/16.
@@ -38,13 +42,16 @@ public class RealEstateParser {
     private static final String LABEL_FLOOR = " nad.";
     private static final String LABEL_PRICE = "Cena: ";
 
+    private Set<String> existingRealEstates = new HashSet<>();
+
     /**
-     * args[0] = url; args[1] = number of pages; args[2] = path to output file
+     * args[0] = url; args[1] = number of pages; args[2] = path to output file; args[3] = path to input file with reference numbers
      */
     public static void main(String[] args) {
         String url = args[0];
         Set<RealEstate> realEstates = new HashSet<>();
         RealEstateParser realEstateParser = new RealEstateParser();
+        realEstateParser.readExistingRealEstates(args[3]);
         for (int i = 1; i < Integer.valueOf(args[1]); i++) {
             Logger.getAnonymousLogger().log(Level.INFO, "Starting to parse page number: " + i);
             String pageSource = RealEstateParserUtils.getPageSource(getPageUrl(url, i));
@@ -80,9 +87,14 @@ public class RealEstateParser {
 
     private RealEstate parseRealEstateAdd(Document addDocument) {
         try {
-            RealEstate.Builder realEstateBuilder = new RealEstate.Builder();
-            parseReferenceNumber(addDocument, realEstateBuilder);
+            String realEstateReferenceNumber = parseReferenceNumber(addDocument);
+            boolean newRealEstate = realEstateReferenceNumber != null && existingRealEstates.add(realEstateReferenceNumber);
+            if (!newRealEstate) {
+                return null;
+            }
 
+            RealEstate.Builder realEstateBuilder = new RealEstate.Builder();
+            realEstateBuilder.referenceNumber(realEstateReferenceNumber);
             Element moreInfo = RealEstateParserUtils.getElementsForClass(addDocument, MORE_INFO_STYLE_CLASS).first();
             if (moreInfo != null) {
                 String moreInfoText = moreInfo.text();
@@ -223,11 +235,10 @@ public class RealEstateParser {
         }
     }
 
-    private void parseReferenceNumber(Document addDocument, RealEstate.Builder realEstateBuilder) {
+    private String parseReferenceNumber(Document addDocument) {
         Elements labels = RealEstateParserUtils.getElementsForClass(addDocument, LABEL_STYLE_CLASS);
-        labels.stream().filter(label -> label.text().equals(LABEL_REFERENCE_NUMBER)).forEach(label -> {
-            realEstateBuilder.referenceNumber(label.nextElementSibling().text());
-        });
+        Element referenceNumberLabel = labels.stream().filter(label -> label.text().equals(LABEL_REFERENCE_NUMBER)).findFirst().orElse(null);
+        return referenceNumberLabel != null ? referenceNumberLabel.firstElementSibling().text() : null;
     }
 
     private void writeToFile(Set<RealEstate> realEstates, String pathToFile) {
@@ -244,6 +255,16 @@ public class RealEstateParser {
             writer.close();
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void readExistingRealEstates(String inputFileName) {
+        try {
+            try (Stream<String> stream = Files.lines(Paths.get(inputFileName))) {
+                stream.forEach(referenceNumber -> existingRealEstates.add(referenceNumber));
+            }
+        } catch (IOException e) {
+            Logger.getAnonymousLogger().log(Level.SEVERE, "Failed to read existing real estates. Error: " + e.getMessage());
         }
     }
 }
