@@ -45,21 +45,21 @@ public class RealEstateParser {
     private Set<String> existingRealEstates = new HashSet<>();
 
     /**
-     * args[0] = url; args[1] = number of pages; args[2] = path to output file; args[3] = path to input file with reference numbers
+     * args[0] = url; args[1] = offset; args[2] = number of pages; args[3] = path to output file; args[4] = path to input file with reference numbers
      */
     public static void main(String[] args) {
         String url = args[0];
         Set<RealEstate> realEstates = new HashSet<>();
         RealEstateParser realEstateParser = new RealEstateParser();
-        realEstateParser.readExistingRealEstates(args[3]);
-        for (int i = 1; i < Integer.valueOf(args[1]); i++) {
+        realEstateParser.readExistingRealEstates(args[4]);
+        for (int i = Integer.valueOf(args[1]); i < Integer.valueOf(args[2]); i++) {
             Logger.getAnonymousLogger().log(Level.INFO, "Starting to parse page number: " + i);
             String pageSource = RealEstateParserUtils.getPageSource(getPageUrl(url, i));
             Set<RealEstate> result = realEstateParser.parseRealEstateAdds(realEstateParser.parseRealEstateAddPage(Jsoup.parse(pageSource)));
             Logger.getAnonymousLogger().log(Level.INFO, "Page done. Number of adds parsed: " + result.size());
             realEstates.addAll(result);
         }
-        realEstateParser.writeToFile(realEstates, args[2]);
+        realEstateParser.writeToFile(realEstates, args[3]);
     }
 
     private static String getPageUrl(String baseUrl, int pageIndex) {
@@ -98,7 +98,6 @@ public class RealEstateParser {
             Element moreInfo = RealEstateParserUtils.getElementsForClass(addDocument, MORE_INFO_STYLE_CLASS).first();
             if (moreInfo != null) {
                 String moreInfoText = moreInfo.text();
-                realEstateBuilder.referenceMoreText(moreInfoText);
                 parseMacroRegion(realEstateBuilder, moreInfoText);
                 parseMicroRegion(realEstateBuilder, moreInfoText);
                 parseMunicipality(realEstateBuilder, moreInfoText);
@@ -113,7 +112,6 @@ public class RealEstateParser {
                     .orElse(null);
             if (shortDescription != null) {
                 String shortDescriptionText = shortDescription.text();
-                realEstateBuilder.referenceShortDescription(shortDescriptionText);
                 parseArea(realEstateBuilder, shortDescriptionText);
                 parseLandArea(realEstateBuilder, shortDescriptionText);
                 parseBuildYear(realEstateBuilder, shortDescriptionText);

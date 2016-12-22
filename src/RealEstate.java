@@ -19,9 +19,6 @@ public class RealEstate {
     private String description;
     private String price;
 
-    private String referenceMoreText;
-    private String referenceShortDescription;
-
     private RealEstate(Builder builder) {
         this.referenceNumber = builder.referenceNumber;
         this.macroLocation = builder.macroLocation;
@@ -37,8 +34,6 @@ public class RealEstate {
         this.energyClass = builder.energyClass;
         this.description = builder.description;
         this.price = builder.price;
-        this.referenceMoreText = builder.referenceMoreText;
-        this.referenceShortDescription = builder.referenceShortDescription;
     }
 
     public String getReferenceNumber() {
@@ -113,9 +108,6 @@ public class RealEstate {
         private String description = "";
         private String price = "";
 
-        private String referenceMoreText;
-        private String referenceShortDescription;
-
         public Builder() {
         }
 
@@ -186,16 +178,6 @@ public class RealEstate {
 
         public Builder price(String price) {
             this.price = price;
-            return this;
-        }
-
-        public Builder referenceMoreText(String referenceMoreText) {
-            this.referenceMoreText = referenceMoreText;
-            return this;
-        }
-
-        public Builder referenceShortDescription(String referenceShortDescription) {
-            this.referenceShortDescription = referenceShortDescription;
             return this;
         }
 
