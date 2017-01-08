@@ -3,13 +3,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,6 +18,14 @@ import java.util.stream.Stream;
  * Created by zana on 06/12/16.
  */
 public class RealEstateParser {
+    //settings
+    private static String url;
+    private static int offset;
+    private static int numberOfPages;
+    private static String pathToOutputFile;
+    private static String pathToInputFileWithReferenceNumbers;
+
+    //constants
     private static final String HREF_ATTRIBUTE = "href";
     private static final String ADD_HREF_PARENT_STYLE_CLASS = "slika";
     private static final String ENERGY_CLASS_STYLE_CLASS = "ei";
@@ -44,22 +50,43 @@ public class RealEstateParser {
 
     private Set<String> existingRealEstates = new HashSet<>();
 
-    /**
-     * args[0] = url; args[1] = offset; args[2] = number of pages; args[3] = path to output file; args[4] = path to input file with reference numbers
-     */
+    static {
+        Properties properties = new Properties();
+        InputStream input = null;
+
+        try {
+            input = new FileInputStream("../out/nepremicnine/nastavitve.properties");
+            properties.load(input);
+            url = properties.getProperty("url");
+            offset = Integer.valueOf(properties.getProperty("offset"));
+            numberOfPages = Integer.valueOf(properties.getProperty("number_of_pages"));
+            pathToOutputFile = properties.getProperty("path_to_output_file");
+            pathToInputFileWithReferenceNumbers = properties.getProperty("path_to_input_file_with_reference_numbers");
+        } catch (IOException e) {
+            Logger.getAnonymousLogger().log(Level.SEVERE, "Failed to read properties. Error: " + e.getMessage());
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     public static void main(String[] args) {
-        String url = args[0];
         Set<RealEstate> realEstates = new HashSet<>();
         RealEstateParser realEstateParser = new RealEstateParser();
-        realEstateParser.readExistingRealEstates(args[4]);
-        for (int i = Integer.valueOf(args[1]); i < Integer.valueOf(args[2]); i++) {
+        realEstateParser.readExistingRealEstates();
+        for (int i = offset; i < numberOfPages; i++) {
             Logger.getAnonymousLogger().log(Level.INFO, "Starting to parse page number: " + i);
             String pageSource = RealEstateParserUtils.getPageSource(getPageUrl(url, i));
             Set<RealEstate> result = realEstateParser.parseRealEstateAdds(realEstateParser.parseRealEstateAddPage(Jsoup.parse(pageSource)));
             Logger.getAnonymousLogger().log(Level.INFO, "Page done. Number of adds parsed: " + result.size());
             realEstates.addAll(result);
         }
-        realEstateParser.writeToFile(realEstates, args[3]);
+        realEstateParser.writeToFile(realEstates);
     }
 
     private static String getPageUrl(String baseUrl, int pageIndex) {
@@ -239,10 +266,10 @@ public class RealEstateParser {
         return referenceNumberLabel != null ? referenceNumberLabel.nextElementSibling().text() : null;
     }
 
-    private void writeToFile(Set<RealEstate> realEstates, String pathToFile) {
+    private void writeToFile(Set<RealEstate> realEstates) {
         PrintWriter writer = null;
         try {
-            writer = new PrintWriter(pathToFile, "UTF-8");
+            writer = new PrintWriter(pathToOutputFile, "UTF-8");
             writer.println(RealEstate.getCsvHeader());
             for (RealEstate realEstate : realEstates) {
                 if (realEstate.allElementsAreEmpty()) {
@@ -256,9 +283,9 @@ public class RealEstateParser {
         }
     }
 
-    private void readExistingRealEstates(String inputFileName) {
+    private void readExistingRealEstates() {
         try {
-            try (Stream<String> stream = Files.lines(Paths.get(inputFileName))) {
+            try (Stream<String> stream = Files.lines(Paths.get(pathToInputFileWithReferenceNumbers))) {
                 stream.forEach(referenceNumber -> existingRealEstates.add(referenceNumber));
             }
         } catch (IOException e) {
