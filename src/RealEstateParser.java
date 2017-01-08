@@ -55,7 +55,7 @@ public class RealEstateParser {
         InputStream input = null;
 
         try {
-            input = new FileInputStream("../out/nepremicnine/nastavitve.properties");
+            input = new FileInputStream("nastavitve.properties");
             properties.load(input);
             url = properties.getProperty("url");
             offset = Integer.valueOf(properties.getProperty("offset"));
