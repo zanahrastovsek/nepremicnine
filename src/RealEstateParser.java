@@ -49,6 +49,8 @@ public class RealEstateParser {
     private static final String LABEL_FLOOR = " nad.";
     private static final String LABEL_PRICE = "Cena: ";
 
+    private static final String PROPERTY_DELIMITER = ", ";
+
     private Set<String> existingRealEstates = new HashSet<>();
 
     static {
@@ -129,7 +131,7 @@ public class RealEstateParser {
                 parseMacroRegion(realEstateBuilder, moreInfoText);
                 parseMicroRegion(realEstateBuilder, moreInfoText);
                 parseMunicipality(realEstateBuilder, moreInfoText);
-                parseRealEstateType(realEstateBuilder, moreInfoText);
+                parseRealEstate(realEstateBuilder, moreInfoText);
                 parseDealType(realEstateBuilder, moreInfoText);
             }
 
@@ -140,6 +142,7 @@ public class RealEstateParser {
                     .orElse(null);
             if (shortDescription != null) {
                 String shortDescriptionText = shortDescription.text();
+                parseRealEstateType(realEstateBuilder, shortDescriptionText);
                 parseArea(realEstateBuilder, shortDescriptionText);
                 parseLandArea(realEstateBuilder, shortDescriptionText);
                 parseBuildYear(realEstateBuilder, shortDescriptionText);
@@ -184,11 +187,25 @@ public class RealEstateParser {
         }
     }
 
-    private void parseRealEstateType(RealEstate.Builder realEstateBuilder, String moreInfoText) {
+    private void parseRealEstate(RealEstate.Builder realEstateBuilder, String moreInfoText) {
         int realEstateTypeStart = moreInfoText.indexOf(LABEL_REAL_ESTATE_TYPE);
         if (realEstateTypeStart != -1) {
             realEstateTypeStart += LABEL_REAL_ESTATE_TYPE.length();
             realEstateBuilder.realEstate(moreInfoText.substring(realEstateTypeStart, moreInfoText.indexOf(" |", realEstateTypeStart)));
+        }
+    }
+
+    private void parseRealEstateType(RealEstate.Builder realEstateBuilder, String shortDescriptionText) {
+        int realEstateTypeStart = shortDescriptionText.indexOf(PROPERTY_DELIMITER, shortDescriptionText.indexOf(LABEL_AREA));
+        int realEstateTypeEnd = shortDescriptionText.indexOf(LABEL_BUILD_YEAR, realEstateTypeStart);
+        if (realEstateTypeStart != -1 && realEstateTypeEnd != -1) {
+            for (; realEstateTypeEnd > 0; realEstateTypeEnd--) {
+                if (shortDescriptionText.charAt(realEstateTypeEnd) == ',') {
+                    break;
+                }
+            }
+            realEstateTypeStart += PROPERTY_DELIMITER.length();
+            realEstateBuilder.realEstateType(shortDescriptionText.substring(realEstateTypeStart, realEstateTypeEnd));
         }
     }
 

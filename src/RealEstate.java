@@ -9,6 +9,7 @@ public class RealEstate {
     private String microLocation;
     private String municipality;
     private String realEstate;
+    private String realEstateType;
     private String dealType;
     private String area;
     private String constructionYear;
@@ -26,6 +27,7 @@ public class RealEstate {
         this.microLocation = builder.microLocation;
         this.municipality = builder.municipality;
         this.realEstate = builder.realEstate;
+        this.realEstateType = builder.realEstateType;
         this.dealType = builder.dealType;
         this.area = builder.area;
         this.constructionYear = builder.constructionYear;
@@ -56,6 +58,10 @@ public class RealEstate {
 
     public String getRealEstate() {
         return realEstate;
+    }
+
+    public String getRealEstateType() {
+        return realEstateType;
     }
 
     public String getDealType() {
@@ -104,6 +110,7 @@ public class RealEstate {
         private String microLocation = "";
         private String municipality = "";
         private String realEstate = "";
+        private String realEstateType = "";
         private String dealType = "";
         private String area = "";
         private String constructionYear = "";
@@ -140,6 +147,11 @@ public class RealEstate {
 
         public Builder realEstate(String realEstate) {
             this.realEstate = realEstate;
+            return this;
+        }
+
+        public Builder realEstateType(String realEstateType) {
+            this.realEstateType = realEstateType;
             return this;
         }
 
@@ -199,12 +211,13 @@ public class RealEstate {
     }
 
     public static String getCsvHeader() {
-        return "Referenčna št.;Regija;Upravna enota;Občina;Vrsta nepremičnine;Vrsta posredovanja;Leto izgradnje;Leto adaptacije;Površina;Površina zemljišča;Nadstropje;Št. nadstropij;Energijski razred;Cena;Opis";
+        return "Referenčna št.;Regija;Upravna enota;Občina;Vrsta nepremičnine;Tip nepremičnine;Vrsta posredovanja;Leto izgradnje;Leto adaptacije;Površina;Površina zemljišča;Nadstropje;Št. nadstropij;Energijski razred;Cena;Opis";
     }
 
     public boolean allElementsAreEmpty() {
         return getReferenceNumber().isEmpty() && getMacroLocation().isEmpty() && getMicroLocation().isEmpty() && getMunicipality().isEmpty() &&
-               getRealEstate().isEmpty() && getDealType().isEmpty() && getArea().isEmpty() && getConstructionYear().isEmpty() &&
+               getRealEstate().isEmpty() && getRealEstateType().isEmpty() && getDealType().isEmpty() && getArea().isEmpty() &&
+               getConstructionYear().isEmpty() &&
                getAdaptationYear().isEmpty() &&
                getLandArea().isEmpty() && getFloor().isEmpty() && getFloorTotal().isEmpty() &&
                getEnergyClass().isEmpty() && getDescription().isEmpty() && getPrice().isEmpty();
@@ -216,6 +229,7 @@ public class RealEstate {
                 .add(getMicroLocation())
                 .add(getMunicipality())
                 .add(getRealEstate())
+                .add(getRealEstateType())
                 .add(getDealType())
                 .add(getConstructionYear())
                 .add(getAdaptationYear())
