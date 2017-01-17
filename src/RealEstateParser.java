@@ -188,7 +188,7 @@ public class RealEstateParser {
         int realEstateTypeStart = moreInfoText.indexOf(LABEL_REAL_ESTATE_TYPE);
         if (realEstateTypeStart != -1) {
             realEstateTypeStart += LABEL_REAL_ESTATE_TYPE.length();
-            realEstateBuilder.realEstateType(moreInfoText.substring(realEstateTypeStart, moreInfoText.indexOf(" |", realEstateTypeStart)));
+            realEstateBuilder.realEstate(moreInfoText.substring(realEstateTypeStart, moreInfoText.indexOf(" |", realEstateTypeStart)));
         }
     }
 

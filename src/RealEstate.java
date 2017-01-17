@@ -8,7 +8,7 @@ public class RealEstate {
     private String macroLocation;
     private String microLocation;
     private String municipality;
-    private String realEstateType;
+    private String realEstate;
     private String dealType;
     private String area;
     private String constructionYear;
@@ -25,7 +25,7 @@ public class RealEstate {
         this.macroLocation = builder.macroLocation;
         this.microLocation = builder.microLocation;
         this.municipality = builder.municipality;
-        this.realEstateType = builder.realEstateType;
+        this.realEstate = builder.realEstate;
         this.dealType = builder.dealType;
         this.area = builder.area;
         this.constructionYear = builder.constructionYear;
@@ -54,8 +54,8 @@ public class RealEstate {
         return municipality;
     }
 
-    public String getRealEstateType() {
-        return realEstateType;
+    public String getRealEstate() {
+        return realEstate;
     }
 
     public String getDealType() {
@@ -103,7 +103,7 @@ public class RealEstate {
         private String macroLocation = "";
         private String microLocation = "";
         private String municipality = "";
-        private String realEstateType = "";
+        private String realEstate = "";
         private String dealType = "";
         private String area = "";
         private String constructionYear = "";
@@ -138,8 +138,8 @@ public class RealEstate {
             return this;
         }
 
-        public Builder realEstateType(String realEstateType) {
-            this.realEstateType = realEstateType;
+        public Builder realEstate(String realEstate) {
+            this.realEstate = realEstate;
             return this;
         }
 
@@ -204,7 +204,7 @@ public class RealEstate {
 
     public boolean allElementsAreEmpty() {
         return getReferenceNumber().isEmpty() && getMacroLocation().isEmpty() && getMicroLocation().isEmpty() && getMunicipality().isEmpty() &&
-               getRealEstateType().isEmpty() && getDealType().isEmpty() && getArea().isEmpty() && getConstructionYear().isEmpty() &&
+               getRealEstate().isEmpty() && getDealType().isEmpty() && getArea().isEmpty() && getConstructionYear().isEmpty() &&
                getAdaptationYear().isEmpty() &&
                getLandArea().isEmpty() && getFloor().isEmpty() && getFloorTotal().isEmpty() &&
                getEnergyClass().isEmpty() && getDescription().isEmpty() && getPrice().isEmpty();
@@ -215,7 +215,7 @@ public class RealEstate {
                 .add(getMacroLocation())
                 .add(getMicroLocation())
                 .add(getMunicipality())
-                .add(getRealEstateType())
+                .add(getRealEstate())
                 .add(getDealType())
                 .add(getConstructionYear())
                 .add(getAdaptationYear())
