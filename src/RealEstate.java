@@ -12,6 +12,7 @@ public class RealEstate {
     private String dealType;
     private String area;
     private String constructionYear;
+    private String adaptationYear;
     private String landArea;
     private String floor;
     private String floorTotal;
@@ -28,6 +29,7 @@ public class RealEstate {
         this.dealType = builder.dealType;
         this.area = builder.area;
         this.constructionYear = builder.constructionYear;
+        this.adaptationYear = builder.adaptationYear;
         this.landArea = builder.landArea;
         this.floor = builder.floor;
         this.floorTotal = builder.floorTotal;
@@ -68,6 +70,10 @@ public class RealEstate {
         return constructionYear;
     }
 
+    public String getAdaptationYear() {
+        return adaptationYear;
+    }
+
     public String getLandArea() {
         return landArea;
     }
@@ -101,6 +107,7 @@ public class RealEstate {
         private String dealType = "";
         private String area = "";
         private String constructionYear = "";
+        private String adaptationYear = "";
         private String landArea = "";
         private String floor = "";
         private String floorTotal = "";
@@ -151,6 +158,11 @@ public class RealEstate {
             return this;
         }
 
+        public Builder adaptationYear(String adaptationYear) {
+            this.adaptationYear = adaptationYear;
+            return this;
+        }
+
         public Builder landArea(String landArea) {
             this.landArea = landArea;
             return this;
@@ -187,12 +199,13 @@ public class RealEstate {
     }
 
     public static String getCsvHeader() {
-        return "Referenčna št.;Regija;Upravna enota;Občina;Vrsta nepremičnine;Vrsta posredovanja;Leto izgradnje;Površina;Površina zemljišča;Nadstropje;Št. nadstropij;Energijski razred;Cena;Opis";
+        return "Referenčna št.;Regija;Upravna enota;Občina;Vrsta nepremičnine;Vrsta posredovanja;Leto izgradnje;Leto adaptacije;Površina;Površina zemljišča;Nadstropje;Št. nadstropij;Energijski razred;Cena;Opis";
     }
 
     public boolean allElementsAreEmpty() {
         return getReferenceNumber().isEmpty() && getMacroLocation().isEmpty() && getMicroLocation().isEmpty() && getMunicipality().isEmpty() &&
                getRealEstateType().isEmpty() && getDealType().isEmpty() && getArea().isEmpty() && getConstructionYear().isEmpty() &&
+               getAdaptationYear().isEmpty() &&
                getLandArea().isEmpty() && getFloor().isEmpty() && getFloorTotal().isEmpty() &&
                getEnergyClass().isEmpty() && getDescription().isEmpty() && getPrice().isEmpty();
     }
@@ -205,6 +218,7 @@ public class RealEstate {
                 .add(getRealEstateType())
                 .add(getDealType())
                 .add(getConstructionYear())
+                .add(getAdaptationYear())
                 .add(getArea())
                 .add(getLandArea())
                 .add(getFloor())

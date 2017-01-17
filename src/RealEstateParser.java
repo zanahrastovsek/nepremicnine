@@ -45,6 +45,7 @@ public class RealEstateParser {
     private static final String LABEL_AREA = " m2";
     private static final String LABEL_LAND_AREA = " m2 zemlj";
     private static final String LABEL_BUILD_YEAR = " l. ";
+    private static final String LABEL_ADAPTATION = " adapt";
     private static final String LABEL_FLOOR = " nad.";
     private static final String LABEL_PRICE = "Cena: ";
 
@@ -142,6 +143,7 @@ public class RealEstateParser {
                 parseArea(realEstateBuilder, shortDescriptionText);
                 parseLandArea(realEstateBuilder, shortDescriptionText);
                 parseBuildYear(realEstateBuilder, shortDescriptionText);
+                parseAdaptationYear(realEstateBuilder, shortDescriptionText);
                 parseFloor(realEstateBuilder, shortDescriptionText);
                 parsePrice(realEstateBuilder, shortDescriptionText);
             }
@@ -249,6 +251,15 @@ public class RealEstateParser {
         if (buildYearStart != -1) {
             buildYearStart += LABEL_BUILD_YEAR.length();
             realEstateBuilder.constructionYear(shortDescriptionText.substring(buildYearStart, shortDescriptionText.indexOf(",", buildYearStart)));
+        }
+    }
+
+    private void parseAdaptationYear(RealEstate.Builder realEstateBuilder, String shortDescriptionText) {
+        int adaptationStart = shortDescriptionText.indexOf(LABEL_ADAPTATION);
+        adaptationStart = shortDescriptionText.indexOf(LABEL_BUILD_YEAR, adaptationStart);
+        if (adaptationStart != -1) {
+            adaptationStart += LABEL_BUILD_YEAR.length();
+            realEstateBuilder.adaptationYear(shortDescriptionText.substring(adaptationStart, shortDescriptionText.indexOf(",", adaptationStart)));
         }
     }
 
