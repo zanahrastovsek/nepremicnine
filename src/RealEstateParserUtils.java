@@ -18,6 +18,7 @@ public class RealEstateParserUtils {
         try {
             URL url = new URL(urlString);
             URLConnection urlConnection = url.openConnection();
+            urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0");
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
             String inputLine;
             while ((inputLine = bufferedReader.readLine()) != null) {
@@ -25,7 +26,7 @@ public class RealEstateParserUtils {
             }
             bufferedReader.close();
         } catch (IOException e) {
-            Logger.getAnonymousLogger().log(Level.SEVERE, "Error obtaining page source. Error: " + e.getMessage());
+            Logger.getLogger(RealEstateParser.PROJECT_TAG).log(Level.SEVERE, "Error obtaining page source. Error: " + e.getMessage());
         }
         return stringBuilder.toString();
     }

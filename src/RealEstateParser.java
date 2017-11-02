@@ -3,12 +3,19 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -18,6 +25,9 @@ import java.util.stream.Stream;
  * Created by zana on 06/12/16.
  */
 public class RealEstateParser {
+    //project
+    public static final String PROJECT_TAG = "nepremicnine";
+
     //settings
     private static String url;
     private static int offset;
@@ -53,28 +63,34 @@ public class RealEstateParser {
 
     private Set<String> existingRealEstates = new HashSet<>();
 
-    static {
-        Properties properties = new Properties();
-        InputStream input = null;
+    private static Logger logger = Logger.getLogger(PROJECT_TAG);
 
+    static {
+        initializeLogger();
+        initializeProperties();
+    }
+
+    private static void initializeLogger() {
         try {
-            input = new FileInputStream("nastavitve.properties");
+            FileHandler fileHandler = new FileHandler(PROJECT_TAG + ".log");
+            logger.addHandler(fileHandler);
+        } catch (IOException e) {
+            logger.info("Failed to initialize logger.");
+        }
+    }
+
+    private static void initializeProperties() {
+        try (InputStream input = new FileInputStream("nastavitve.properties")) {
+            Properties properties = new Properties();
             properties.load(input);
             url = properties.getProperty("url");
             offset = Integer.valueOf(properties.getProperty("offset"));
             numberOfPages = Integer.valueOf(properties.getProperty("number_of_pages"));
             pathToOutputFile = properties.getProperty("path_to_output_file");
             pathToInputFileWithReferenceNumbers = properties.getProperty("path_to_input_file_with_reference_numbers");
-        } catch (IOException e) {
-            Logger.getAnonymousLogger().log(Level.SEVERE, "Failed to read properties. Error: " + e.getMessage());
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Failed to read properties. Error: " + e.getMessage());
+            throw new RuntimeException("Properties are required for parser configuration.");
         }
     }
 
@@ -83,10 +99,10 @@ public class RealEstateParser {
         RealEstateParser realEstateParser = new RealEstateParser();
         realEstateParser.readExistingRealEstates();
         for (int i = offset; i < numberOfPages; i++) {
-            Logger.getAnonymousLogger().log(Level.INFO, "Starting to parse page number: " + i);
+            logger.log(Level.INFO, "Starting to parse page number: " + i);
             String pageSource = RealEstateParserUtils.getPageSource(getPageUrl(url, i));
             Set<RealEstate> result = realEstateParser.parseRealEstateAdds(realEstateParser.parseRealEstateAddPage(Jsoup.parse(pageSource)));
-            Logger.getAnonymousLogger().log(Level.INFO, "Page done. Number of adds parsed: " + result.size());
+            logger.log(Level.INFO, "Page done. Number of adds parsed: " + result.size());
             realEstates.addAll(result);
         }
         realEstateParser.writeToFile(realEstates);
@@ -111,8 +127,8 @@ public class RealEstateParser {
         return addDocuments;
     }
 
-    Set<RealEstate> parseRealEstateAdds(Set<Document> addDocuments) {
-        return addDocuments.stream().map(this::parseRealEstateAdd).filter(result -> result != null).collect(Collectors.toSet());
+    private Set<RealEstate> parseRealEstateAdds(Set<Document> addDocuments) {
+        return addDocuments.stream().map(this::parseRealEstateAdd).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     private RealEstate parseRealEstateAdd(Document addDocument) {
@@ -158,7 +174,7 @@ public class RealEstateParser {
             realEstateBuilder.description(description != null ? description.text() : null);
             return realEstateBuilder.build();
         } catch (RuntimeException e) {
-            Logger.getAnonymousLogger().log(Level.SEVERE, "Parsing an add resulted in fatal crash. Error: " + e.getMessage());
+            logger.log(Level.SEVERE, "Parsing an add resulted in fatal crash. Error: " + e.getMessage());
         }
         return null;
     }
@@ -317,7 +333,7 @@ public class RealEstateParser {
                 stream.forEach(referenceNumber -> existingRealEstates.add(referenceNumber));
             }
         } catch (IOException e) {
-            Logger.getAnonymousLogger().log(Level.SEVERE, "Failed to read existing real estates. Error: " + e.getMessage());
+            logger.log(Level.SEVERE, "Failed to read existing real estates. Error: " + e.getMessage());
         }
     }
 }
